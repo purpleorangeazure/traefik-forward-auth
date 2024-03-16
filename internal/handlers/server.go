@@ -316,6 +316,7 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 
 		// Exchange code for token
 		oauth2Token, err := oauth2Config.Exchange(s.config.OIDCContext, r.URL.Query().Get("code"))
+		logger.Errorf("failed to exchange token: %v", oauth2Token)
 		if err != nil {
 			logger.Errorf("failed to exchange token: %v", err)
 			http.Error(w, "Bad Gateway", 502)
