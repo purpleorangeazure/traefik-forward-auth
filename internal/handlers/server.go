@@ -316,7 +316,6 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 
 		// Exchange code for token
 		oauth2Token, err := oauth2Config.Exchange(s.config.OIDCContext, r.URL.Query().Get("code"))
-		logger.Errorf("failed to exchange token: %v", oauth2Token)
 		if err != nil {
 			logger.Errorf("failed to exchange token: %v", err)
 			http.Error(w, "Bad Gateway", 502)
@@ -392,15 +391,13 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			logger.Warnf("failed to get groups claim from the ID token (GroupsAttributeName: %s)", s.config.GroupsAttributeName)
 		}
 
-		roles := []string{}
-		rolesClaim, ok := claims[s.config.RolesAttributeName].([]interface{})
-		if ok {
-			for _, ro := range rolesClaim {
-				roles = append(roles, ro.(string))
-			}
-		} else {
-			logger.Warnf("failed to get roles claim from the ID token (RolesAttributeName: %s)", s.config.GroupsAttributeName)
+		roles, ok := oauth2Token.Extra("roleNames").([]string)
+		if !ok {
+			logger.Error("missing roles")
+			http.Error(w, "Bad Gateway", 502)
+			return
 		}
+
 
 		if err := s.userinfo.Save(r, w, &v1alpha1.UserInfo{
 			Username: name.(string),
