@@ -330,26 +330,11 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			return
 		}
 
-		// Extract the ID Token from OAuth2 token.
-		rawAccessToken, ok := oauth2Token.Extra("access_token").(string)
-		if !ok {
-			logger.Error("missing Access token")
-			http.Error(w, "Bad Gateway", 502)
-			return
-		}
-
 		// Parse and verify ID Token payload.
 		verifier := provider.Verifier(&oidc.Config{ClientID: s.config.ClientID})
 		idToken, err := verifier.Verify(s.config.OIDCContext, rawIDToken)
 		if err != nil {
 			logger.Errorf("failed to verify id token: %v", err)
-			http.Error(w, "Bad Gateway", 502)
-			return
-		}
-
-		accessToken, err := verifier.Verify(s.config.OIDCContext, rawAccessToken)
-		if err != nil {
-			logger.Errorf("failed to verify acc token: %v", err)
 			http.Error(w, "Bad Gateway", 502)
 			return
 		}
