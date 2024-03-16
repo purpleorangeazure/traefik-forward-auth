@@ -405,7 +405,7 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			Username: name.(string),
 			Email:    email.(string),
 			Groups:   groups,
-			Roles: roles
+			Roles: roles,
 		}); err != nil {
 			logger.Errorf("error saving session: %v", err)
 			http.Error(w, "Bad Gateway", 502)
