@@ -392,7 +392,7 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 		}
 
 		roles := []string{}
-		rolesClaim, ok := claims[s.config.GroupsAttributeName].([]interface{})
+		rolesClaim, ok := claims[s.config.RolesAttributeName].([]interface{})
 		if ok {
 			for _, ro := range rolesClaim {
 				roles = append(roles, ro.(string))

@@ -60,6 +60,7 @@ type Config struct {
 	GroupClaimPrefix        string               `long:"group-claim-prefix" env:"GROUP_CLAIM_PREFIX" default:"oidc:" description:"prefix oidc group claims with this value"`
 	EncryptionKeyString     string               `long:"encryption-key" env:"ENCRYPTION_KEY" description:"Encryption key used to encrypt the cookie (required)" json:"-"`
 	GroupsAttributeName     string               `long:"groups-attribute-name" env:"GROUPS_ATTRIBUTE_NAME" default:"groups" description:"Map the correct attribute that contain the user groups"`
+	RolesAttributeName     string               `long:"roles-attribute-name" env:"ROLES_ATTRIBUTE_NAME" default:"roleNames" description:"Map the correct attribute that contain the user roles"`
 
 	// RBAC
 	EnableRBAC              bool               `long:"enable-rbac" env:"ENABLE_RBAC" description:"Indicates that RBAC support should be enabled"`
