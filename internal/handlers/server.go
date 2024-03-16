@@ -391,10 +391,21 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			logger.Warnf("failed to get groups claim from the ID token (GroupsAttributeName: %s)", s.config.GroupsAttributeName)
 		}
 
+		roles := []string{}
+		rolesClaim, ok := claims[s.config.GroupsAttributeName].([]interface{})
+		if ok {
+			for _, ro := range rolesClaim {
+				roles = append(roles, ro.(string))
+			}
+		} else {
+			logger.Warnf("failed to get roles claim from the ID token (RolesAttributeName: %s)", s.config.GroupsAttributeName)
+		}
+
 		if err := s.userinfo.Save(r, w, &v1alpha1.UserInfo{
 			Username: name.(string),
 			Email:    email.(string),
 			Groups:   groups,
+			Roles: roles
 		}); err != nil {
 			logger.Errorf("error saving session: %v", err)
 			http.Error(w, "Bad Gateway", 502)
