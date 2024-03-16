@@ -391,7 +391,7 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			logger.Warnf("failed to get groups claim from the ID token (GroupsAttributeName: %s)", s.config.GroupsAttributeName)
 		}
 
-		logger.Error(fmt.Sprintf("%v", claims))
+		logger.Error(fmt.Sprintf("%v", oauth2Token.Raw))
 
 		roles, ok := (oauth2Token.Extra("user").(map[string]interface{}))["roleNames"].([]string)
 		if !ok {
