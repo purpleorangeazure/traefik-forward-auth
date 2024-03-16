@@ -392,7 +392,7 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 		}
 
 
-		roles, ok := (oauth2Token.Extra("permissions").([]string)
+		roles, ok := oauth2Token.Extra("permissions").([]string)
 		if !ok {
 			logger.Error("missing roles")
 			http.Error(w, "Bad Gateway", 502)
