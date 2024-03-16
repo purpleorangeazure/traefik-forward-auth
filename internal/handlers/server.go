@@ -330,11 +330,26 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			return
 		}
 
+		// Extract the ID Token from OAuth2 token.
+		rawAccessToken, ok := oauth2Token.Extra("access_token").(string)
+		if !ok {
+			logger.Error("missing Access token")
+			http.Error(w, "Bad Gateway", 502)
+			return
+		}
+
 		// Parse and verify ID Token payload.
 		verifier := provider.Verifier(&oidc.Config{ClientID: s.config.ClientID})
 		idToken, err := verifier.Verify(s.config.OIDCContext, rawIDToken)
 		if err != nil {
-			logger.Errorf("failed to verify token: %v", err)
+			logger.Errorf("failed to verify id token: %v", err)
+			http.Error(w, "Bad Gateway", 502)
+			return
+		}
+
+		accessToken, err := verifier.Verify(s.config.OIDCContext, rawAccessToken)
+		if err != nil {
+			logger.Errorf("failed to verify acc token: %v", err)
 			http.Error(w, "Bad Gateway", 502)
 			return
 		}
@@ -391,8 +406,9 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			logger.Warnf("failed to get groups claim from the ID token (GroupsAttributeName: %s)", s.config.GroupsAttributeName)
 		}
 
+		logger.Error(fmt.Sprintf("%v", accessToken))
 
-		roles, ok := oauth2Token.Extra("permissions").([]string)
+		roles, ok := (oauth2Token.Extra("user").(map[string]interface{}))["roleNames"].([]string)
 		if !ok {
 			logger.Error("missing roles")
 			http.Error(w, "Bad Gateway", 502)
