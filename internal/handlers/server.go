@@ -228,7 +228,7 @@ func (s *Server) AuthHandler(rule string) http.HandlerFunc {
 			w.Header().Add(s.config.ForwardTokenHeaderName, s.config.ForwardTokenPrefix+id.Token)
 		}
 
-		w.Header().Add('X-Forwarded-Groups', strings.Join(groups,','))
+		w.Header().Add('X-Forwarded-Groups', strings.Join(groups,","))
 
 		w.WriteHeader(200)
 	}
