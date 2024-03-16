@@ -391,9 +391,8 @@ func (s *Server) AuthCallbackHandler() http.HandlerFunc {
 			logger.Warnf("failed to get groups claim from the ID token (GroupsAttributeName: %s)", s.config.GroupsAttributeName)
 		}
 
-		logger.Error(fmt.Sprintf("%v", oauth2Token.raw))
 
-		roles, ok := (oauth2Token.Extra("user").(map[string]interface{}))["roleNames"].([]string)
+		roles, ok := (oauth2Token.Extra("permissions").([]string)
 		if !ok {
 			logger.Error("missing roles")
 			http.Error(w, "Bad Gateway", 502)
