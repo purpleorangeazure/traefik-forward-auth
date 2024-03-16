@@ -176,6 +176,20 @@ func (s *Server) AuthHandler(rule string) http.HandlerFunc {
 			return
 		}
 
+		// Authorize user
+		roles, err := s.getRolesFromSession(r)
+		if err != nil {
+			logger.Errorf("error getting roles from session: %v", err)
+			s.notAuthenticated(logger, w, r)
+			return
+		}
+
+		if roles == nil {
+			logger.Info("roles session data is missing, re-authenticating")
+			s.notAuthenticated(logger, w, r)
+			return
+		}
+
 		if s.config.EnableRBAC && !s.authzIsBypassed(r) {
 			kubeUserInfo := s.makeKubeUserInfo(id.Email, groups)
 
@@ -228,7 +242,7 @@ func (s *Server) AuthHandler(rule string) http.HandlerFunc {
 			w.Header().Add(s.config.ForwardTokenHeaderName, s.config.ForwardTokenPrefix+id.Token)
 		}
 
-		w.Header().Add("X-Forwarded-Groups", strings.Join(groups,","))
+		w.Header().Add("X-Forwarded-Roles", strings.Join(roles,","))
 
 		w.WriteHeader(200)
 	}
@@ -493,6 +507,14 @@ func (s *Server) getGroupsFromSession(r *http.Request) ([]string, error) {
 		return nil, err
 	}
 	return userInfo.Groups, nil
+}
+
+func (s *Server) getRolesFromSession(r *http.Request) ([]string, error) {
+	userInfo, err := s.userinfo.Get(r)
+	if err != nil {
+		return nil, err
+	}
+	return userInfo.Roles, nil
 }
 
 // authzIsBypassed returns true if the request matches a bypass URI pattern
